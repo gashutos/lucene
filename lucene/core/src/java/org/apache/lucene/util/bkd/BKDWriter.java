@@ -46,6 +46,8 @@ import org.apache.lucene.util.NumericUtils;
 import org.apache.lucene.util.PriorityQueue;
 import org.apache.lucene.util.bkd.BKDUtil.ByteArrayPredicate;
 
+import static org.apache.lucene.codecs.Codec.LuceneCodec;
+
 // TODO
 //   - allow variable length byte[] (across docs and dims), but this is quite a bit more hairy
 //   - we could also index "auto-prefix terms" here, and use better compression, and maybe only use
@@ -1289,7 +1291,11 @@ public class BKDWriter implements Closeable {
       throws IOException {
     assert count > 0 : "config.maxPointsInLeafNode=" + config.maxPointsInLeafNode;
     out.writeVInt(count);
-    docIdsWriter.writeDocIds(docIDs, start, count, out);
+    if(LuceneCodec == "Lucene91") {
+      docIdsWriter.writeDocIdsLegacy(docIDs, start, count, out);
+    } else {
+      docIdsWriter.writeDocIds(docIDs, start, count, out);
+    }
   }
 
   private void writeLeafBlockPackedValues(

@@ -41,6 +41,17 @@ public abstract class Codec implements NamedSPILoader.NamedSPI {
    * This static holder class prevents classloading deadlock by delaying init of default codecs and
    * available codecs until needed.
    */
+  public static final String LUCENE_CODEC_ENV = "LUCENE_CODEC";
+  /**
+   *  Lucene codec used for current opensearch version
+   */
+  public static String LuceneCodec = System.getenv(LUCENE_CODEC_ENV);
+  static {
+    if(LuceneCodec == null || LuceneCodec == "") {
+      LuceneCodec = "Lucene91"; // defaults Lucene91
+    }
+  }
+
   private static final class Holder {
     private static final NamedSPILoader<Codec> LOADER = new NamedSPILoader<>(Codec.class);
 
