@@ -41,6 +41,8 @@ import org.apache.lucene.util.IOUtils;
 import org.apache.lucene.util.fst.ByteSequenceOutputs;
 import org.apache.lucene.util.fst.Outputs;
 
+import static org.apache.lucene.codecs.Codec.LuceneCodec;
+
 /**
  * A block-based terms index and dictionary that assigns terms to variable length blocks according
  * to how they share prefixes. The terms index is a prefix trie whose leaves are term blocks. The
@@ -91,7 +93,7 @@ public final class Lucene90BlockTreeTermsReader extends FieldsProducer {
   public static final int VERSION_FST_CONTINUOUS_ARCS = 2;
 
   /** Current terms format. */
-  public static final int VERSION_CURRENT = VERSION_FST_CONTINUOUS_ARCS;
+  public static final int VERSION_CURRENT = (LuceneCodec == "Lucene95") ? VERSION_START : VERSION_FST_CONTINUOUS_ARCS;
 
   /** Extension of terms index file */
   static final String TERMS_INDEX_EXTENSION = "tip";

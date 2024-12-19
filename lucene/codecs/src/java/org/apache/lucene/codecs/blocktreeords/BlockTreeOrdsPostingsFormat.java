@@ -17,6 +17,9 @@
 package org.apache.lucene.codecs.blocktreeords;
 
 import java.io.IOException;
+
+import org.apache.lucene.backward_codecs.lucene90.Lucene90PostingsReader;
+import org.apache.lucene.backward_codecs.lucene90.Lucene90PostingsWriter;
 import org.apache.lucene.codecs.FieldsConsumer;
 import org.apache.lucene.codecs.FieldsProducer;
 import org.apache.lucene.codecs.PostingsFormat;
@@ -29,7 +32,9 @@ import org.apache.lucene.index.SegmentReadState;
 import org.apache.lucene.index.SegmentWriteState;
 import org.apache.lucene.util.IOUtils;
 
-/** Uses {@link OrdsBlockTreeTermsWriter} with {@link Lucene99PostingsWriter}. */
+import static org.apache.lucene.codecs.Codec.LuceneCodec;
+
+/** Uses {@link OrdsBlockTreeTermsWriter} with {@link Lucene90PostingsWriter}. */
 public class BlockTreeOrdsPostingsFormat extends PostingsFormat {
 
   private final int minTermBlockSize;
@@ -67,7 +72,7 @@ public class BlockTreeOrdsPostingsFormat extends PostingsFormat {
 
   @Override
   public FieldsConsumer fieldsConsumer(SegmentWriteState state) throws IOException {
-    PostingsWriterBase postingsWriter = new Lucene99PostingsWriter(state);
+    PostingsWriterBase postingsWriter = (LuceneCodec == "Lucene95") ? new Lucene90PostingsWriter(state) : new Lucene99PostingsWriter(state);
 
     boolean success = false;
     try {
@@ -84,7 +89,7 @@ public class BlockTreeOrdsPostingsFormat extends PostingsFormat {
 
   @Override
   public FieldsProducer fieldsProducer(SegmentReadState state) throws IOException {
-    PostingsReaderBase postingsReader = new Lucene99PostingsReader(state);
+    PostingsReaderBase postingsReader = (LuceneCodec == "Lucene95") ? new Lucene90PostingsReader(state) : new Lucene99PostingsReader(state);
     boolean success = false;
     try {
       FieldsProducer ret = new OrdsBlockTreeTermsReader(postingsReader, state);

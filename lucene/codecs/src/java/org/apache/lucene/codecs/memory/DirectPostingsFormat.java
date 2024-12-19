@@ -48,6 +48,8 @@ import org.apache.lucene.util.automaton.CompiledAutomaton;
 import org.apache.lucene.util.automaton.RunAutomaton;
 import org.apache.lucene.util.automaton.Transition;
 
+import static org.apache.lucene.codecs.Codec.LuceneCodec;
+
 // TODO:
 //   - build depth-N prefix hash?
 //   - or: longer dense skip lists than just next byte?
@@ -96,12 +98,12 @@ public final class DirectPostingsFormat extends PostingsFormat {
 
   @Override
   public FieldsConsumer fieldsConsumer(SegmentWriteState state) throws IOException {
-    return PostingsFormat.forName("Lucene99").fieldsConsumer(state);
+    return PostingsFormat.forName((LuceneCodec == "Lucene95") ? "Lucene90" : "Lucene99").fieldsConsumer(state);
   }
 
   @Override
   public FieldsProducer fieldsProducer(SegmentReadState state) throws IOException {
-    FieldsProducer postings = PostingsFormat.forName("Lucene99").fieldsProducer(state);
+    FieldsProducer postings = PostingsFormat.forName((LuceneCodec == "Lucene95") ? "Lucene90" : "Lucene99").fieldsProducer(state);
     if (state.context.context != IOContext.Context.MERGE) {
       FieldsProducer loadedPostings;
       try {

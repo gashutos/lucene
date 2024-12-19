@@ -21,5 +21,6 @@ description = 'Lucene codecs and postings formats'
 
 dependencies {
     moduleImplementation project(':lucene:core')
+    moduleImplementation project(':lucene:backward-codecs')
     moduleTestImplementation project(':lucene:test-framework')
 }

@@ -16,6 +16,7 @@
  */
 package org.apache.lucene.util.fst;
 
+import static org.apache.lucene.codecs.Codec.LuceneCodec;
 import static org.apache.lucene.util.fst.FST.Arc.BitTable;
 import static org.apache.lucene.util.fst.FSTCompiler.getOnHeapReaderWriter;
 
@@ -122,7 +123,7 @@ public final class FST<T> implements Accountable {
   public static final int VERSION_CONTINUOUS_ARCS = 9;
 
   /** Current version. */
-  public static final int VERSION_CURRENT = VERSION_CONTINUOUS_ARCS;
+  public static final int VERSION_CURRENT = (LuceneCodec == "Lucene95") ? VERSION_LITTLE_ENDIAN : VERSION_CONTINUOUS_ARCS;
 
   /** Version that was used when releasing Lucene 9.0. */
   public static final int VERSION_90 = VERSION_LITTLE_ENDIAN;

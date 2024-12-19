@@ -17,13 +17,8 @@
 package org.apache.lucene.backward_codecs.lucene90;
 
 import java.io.IOException;
-import org.apache.lucene.codecs.BlockTermState;
-import org.apache.lucene.codecs.CodecUtil;
-import org.apache.lucene.codecs.FieldsConsumer;
-import org.apache.lucene.codecs.FieldsProducer;
-import org.apache.lucene.codecs.MultiLevelSkipListWriter;
-import org.apache.lucene.codecs.PostingsFormat;
-import org.apache.lucene.codecs.PostingsReaderBase;
+
+import org.apache.lucene.codecs.*;
 import org.apache.lucene.codecs.lucene90.blocktree.Lucene90BlockTreeTermsReader;
 import org.apache.lucene.codecs.lucene90.blocktree.Lucene90BlockTreeTermsWriter;
 import org.apache.lucene.index.IndexOptions;
@@ -372,11 +367,31 @@ public final class Lucene90PostingsFormat extends PostingsFormat {
 
   // Increment version to change it
   static final int VERSION_START = 0;
-  static final int VERSION_CURRENT = 1;
+  static final int VERSION_CURRENT = VERSION_START;
+  private final int minTermBlockSize;
+  private final int maxTermBlockSize;
 
-  /** Creates read-only {@code Lucene90PostingsFormat}. */
+  /** Creates {@code Lucene90PostingsFormat} with default settings. */
+
   public Lucene90PostingsFormat() {
+    this(
+            Lucene90BlockTreeTermsWriter.DEFAULT_MIN_BLOCK_SIZE,
+            Lucene90BlockTreeTermsWriter.DEFAULT_MAX_BLOCK_SIZE);
+  }
+
+  /**
+   * Creates {@code Lucene90PostingsFormat} with custom values for {@code minBlockSize} and {@code
+   * maxBlockSize} passed to block terms dictionary.
+   *
+   * @see
+   *     Lucene90BlockTreeTermsWriter#Lucene90BlockTreeTermsWriter(SegmentWriteState,PostingsWriterBase,int,int)
+   */
+
+  public Lucene90PostingsFormat(int minTermBlockSize, int maxTermBlockSize) {
     super("Lucene90");
+    Lucene90BlockTreeTermsWriter.validateSettings(minTermBlockSize, maxTermBlockSize);
+    this.minTermBlockSize = minTermBlockSize;
+    this.maxTermBlockSize = maxTermBlockSize;
   }
 
   @Override
@@ -385,8 +400,20 @@ public final class Lucene90PostingsFormat extends PostingsFormat {
   }
 
   @Override
-  public FieldsConsumer fieldsConsumer(SegmentWriteState state) {
-    throw new UnsupportedOperationException("Old codecs may only be used for reading");
+  public FieldsConsumer fieldsConsumer(SegmentWriteState state) throws IOException {
+    PostingsWriterBase postingsWriter = new Lucene90PostingsWriter(state);
+    boolean success = false;
+    try {
+      FieldsConsumer ret =
+              new Lucene90BlockTreeTermsWriter(
+                      state, postingsWriter, minTermBlockSize, maxTermBlockSize);
+      success = true;
+      return ret;
+    } finally {
+      if (!success) {
+        IOUtils.closeWhileHandlingException(postingsWriter);
+      }
+    }
   }
 
   @Override

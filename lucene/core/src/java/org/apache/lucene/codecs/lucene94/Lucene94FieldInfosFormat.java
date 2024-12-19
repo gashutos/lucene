@@ -39,6 +39,8 @@ import org.apache.lucene.store.IOContext;
 import org.apache.lucene.store.IndexInput;
 import org.apache.lucene.store.IndexOutput;
 
+import static org.apache.lucene.codecs.Codec.LuceneCodec;
+
 /**
  * Lucene 9.0 Field Infos format.
  *
@@ -422,7 +424,7 @@ public final class Lucene94FieldInfosFormat extends FieldInfosFormat {
   static final String CODEC_NAME = "Lucene94FieldInfos";
   static final int FORMAT_START = 0;
   // this doesn't actually change the file format but uses up one more bit an existing bit pattern
-  static final int FORMAT_PARENT_FIELD = 1;
+  static final int FORMAT_PARENT_FIELD = (LuceneCodec == "Lucene95") ? 0 : 1;
   static final int FORMAT_CURRENT = FORMAT_PARENT_FIELD;
 
   // Field flags
